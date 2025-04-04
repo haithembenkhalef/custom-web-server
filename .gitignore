@@ -1,0 +1,36 @@
+# Ignore Java class files
+*.class
+
+# Ignore IntelliJ IDEA project files
+.idea/
+*.iml
+
+# Ignore Eclipse project files
+.project
+.classpath
+.settings/
+
+# Ignore build directory (typically used by build tools like Maven or Gradle)
+target/
+build/
+
+# Ignore Maven wrapper files
+.mvn/
+
+# Ignore dependency directories for Maven or Gradle
+/.m2/
+.gradle/
+
+# Ignore IDE specific files
+*.swp
+*.swo
+.DS_Store
+
+# Ignore log files
+*.log
+
+# Ignore compiled jar files
+*.jar
+
+# Ignore dependency cache
+**/node_modules/

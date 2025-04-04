@@ -1,8 +1,9 @@
 package com.webby.handlers;
 
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import com.webby.model.HttpRequest;
+import com.webby.model.HttpResponse;
 
+@FunctionalInterface
 public interface RequestRunner {
     HttpResponse run(HttpRequest request);
 }
