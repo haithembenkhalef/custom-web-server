@@ -3,11 +3,11 @@ package com.webby.parsing;
 import com.webby.model.HttpMethod;
 import com.webby.model.HttpRequest;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * HttpDecoder:
@@ -16,38 +16,32 @@ import java.util.*;
  */
 public class HttpDecoder {
 
-    public static Optional<List<String>> decode(final InputStream inputStream) {
+    public static Optional<List<String>> decode( final InputStream inputStream) {
         return readMessage(inputStream);
     }
 
-    public static Optional<HttpRequest> buildRequest(final InputStream inputStream) {
+    public static Optional<HttpRequest> buildRequest( final InputStream inputStream) {
         return decode(inputStream).flatMap(HttpDecoder::buildRequest);
     }
 
-    private static Optional<List<String>> readMessage(final InputStream inputStream) {
-        try {
-            if (!(inputStream.available() > 0)) {
-                return Optional.empty();
-            }
+    private static Optional<List<String>> readMessage( final InputStream inputStream) {
+        List<String> message = new ArrayList<>();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
+        try {
             final char[] inBuffer = new char[inputStream.available()];
             final InputStreamReader inReader = new InputStreamReader(inputStream);
             final int read = inReader.read(inBuffer);
-
-            List<String> message = new ArrayList<>();
-
             try (Scanner sc = new Scanner(new String(inBuffer))) {
                 while (sc.hasNextLine()) {
                     String line = sc.nextLine();
                     message.add(line);
                 }
             }
-
-            return Optional.of(message);
-        } catch (Exception ignored) {
-            ignored.printStackTrace();
+        } catch (IOException e) {
             return Optional.empty();
         }
+        return message.isEmpty() ? Optional.empty() : Optional.of(message);
     }
 
     private static Optional<com.webby.model.HttpRequest> buildRequest(List<String> message) {
@@ -71,11 +65,20 @@ public class HttpDecoder {
             com.webby.model.HttpRequest.Builder requestBuilder = new com.webby.model.HttpRequest.Builder();
             requestBuilder.setHttpMethod(HttpMethod.valueOf(httpInfo[0]));
             requestBuilder.setUri(new URI(httpInfo[1]));
+            requestBuilder.setProtocolVersion(protocolVersion);
             return Optional.of(addRequestHeaders(message, requestBuilder));
         } catch (URISyntaxException | IllegalArgumentException e) {
             e.printStackTrace();
             return Optional.empty();
         }
+    }
+
+    public static Optional<com.webby.model.HttpRequest> buildRequest(String message) {
+        List<String> lines = Arrays.stream(message.split("\\R"))
+                .map(String::trim)
+                .filter(line -> !line.isEmpty())
+                .collect(Collectors.toList());
+        return buildRequest(lines);
     }
 
     private static HttpRequest addRequestHeaders(final List<String> message, final HttpRequest.Builder builder) {
@@ -86,7 +89,7 @@ public class HttpDecoder {
                 String header = message.get(i);
                 int colonIndex = header.indexOf(':');
 
-                if (! (colonIndex > 0 && header.length() > colonIndex + 1)) {
+                if (!(colonIndex > 0 && header.length() > colonIndex + 1)) {
                     break;
                 }
 
@@ -98,6 +101,7 @@ public class HttpDecoder {
                         values.add(headerValue);
                     } else {
                         values = new ArrayList<>();
+                        values.add(headerValue.trim());
                     }
                     return values;
                 });

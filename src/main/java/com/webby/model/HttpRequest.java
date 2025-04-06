@@ -6,13 +6,15 @@ import java.util.Map;
 
 public class HttpRequest {
   private final HttpMethod httpMethod;
+  private final String protocolVersion;
   private final URI uri;
   private final Map<String, List<String>> requestHeaders;
 
-  private HttpRequest(HttpMethod opCode,
-                     URI uri,
-                     Map<String, List<String>> requestHeaders) {
+  private HttpRequest(HttpMethod opCode, String protocolVersion,
+                      URI uri,
+                      Map<String, List<String>> requestHeaders) {
       this.httpMethod = opCode;
+      this.protocolVersion = protocolVersion;
       this.uri = uri;
       this.requestHeaders = requestHeaders;
   }
@@ -29,15 +31,25 @@ public class HttpRequest {
       return requestHeaders;
   }
 
-  public static class Builder {
+    public String getProtocolVersion() {
+        return protocolVersion;
+    }
+
+    public static class Builder {
       private HttpMethod httpMethod;
       private URI uri;
       private Map<String, List<String>> requestHeaders;
+      private String protocolVersion;
 
-     public Builder() {
+
+      public Builder() {
      }
 
-     public void setHttpMethod(HttpMethod httpMethod) {
+      public void setProtocolVersion(String protocolVersion) {
+          this.protocolVersion = protocolVersion;
+      }
+
+      public void setHttpMethod(HttpMethod httpMethod) {
          this.httpMethod = httpMethod;
      }
 
@@ -50,7 +62,7 @@ public class HttpRequest {
      }
 
      public HttpRequest build() {
-         return new HttpRequest(httpMethod, uri, requestHeaders);
+         return new HttpRequest(httpMethod, protocolVersion, uri, requestHeaders );
      }
   }
 }

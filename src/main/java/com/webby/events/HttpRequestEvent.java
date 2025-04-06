@@ -1,27 +1,35 @@
 package com.webby.events;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-
 public class HttpRequestEvent {
 
-    private InputStream request;
-    private OutputStream response;
+    String connectionId;
 
+    String httpRequestString;
 
-    public InputStream getRequest() {
-        return request;
+    public String getHttpRequestString() {
+        return httpRequestString;
     }
 
-    public OutputStream getResponse() {
-        return response;
+    public void setHttpRequestString(String httpRequestString) {
+        this.httpRequestString = httpRequestString;
     }
 
-    public void setRequest(InputStream request) {
-        this.request = request;
+    private boolean isProcessed = false;
+
+    public String getConnectionId() {
+        return connectionId;
     }
 
-    public void setResponse(OutputStream response) {
-        this.response = response;
+    public void setConnectionId(String connectionId) {
+        this.connectionId = connectionId;
+    }
+
+    public boolean isProcessed() {
+        return isProcessed;
+    }
+
+    public void reset() {
+        this.isProcessed = false;
+        this.setHttpRequestString("");
     }
 }
