@@ -60,7 +60,7 @@ public class ResponseWriter {
         return responseHeadersList;
     }
 
-    public static void writeResponse(final HttpRequest request, final SocketChannel outputStream, final HttpResponse response) throws IOException {
+    public static String writeResponse(final HttpRequest request, final HttpResponse response) throws IOException {
         final int statusCode = response.getStatusCode();
         final String statusCodeMeaning = HttpStatus.getStatusMessage(statusCode);
         final Optional<String> entityString = response.getEntity().flatMap(ResponseWriter::getResponseString);
@@ -89,9 +89,7 @@ public class ResponseWriter {
         // Add connection close
         if(request!= null && request.getRequestHeaders().containsKey("Connection")) {
             List<String> connectionHeader = request.getRequestHeaders().get("Connection");
-            if(!connectionHeader.contains("keep-alive"))
-                responseBuilder.append("Connection: close\r\n");
-            else responseBuilder.append("Connection: keep-alive\r\n");
+            responseBuilder.append("Connection: close\r\n");
         }
 
         // Empty line to end headers
@@ -101,18 +99,8 @@ public class ResponseWriter {
         entityString.ifPresent(responseBuilder::append);
 
         // Convert to bytes
-        byte[] responseBytes = responseBuilder.toString().getBytes(StandardCharsets.UTF_8);
-
-        // Write fully to channel
-        writeToChannel(outputStream, ByteBuffer.wrap(responseBytes));
+        return responseBuilder.toString();
     }
-
-    private static void writeToChannel(SocketChannel outputStream, ByteBuffer buffer) throws IOException {
-        while (buffer.hasRemaining()) {
-            outputStream.write(buffer);
-        }
-    }
-
 
     private static Optional<String> getResponseString(final Object entity) {
         // Currently only supporting Strings
